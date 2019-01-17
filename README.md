@@ -1,10 +1,24 @@
-### 网页端文件上传下载目录浏览
-
+# 生成文件下载链接, 监听80端口
 ```
-easy -download -f demo.txt -p 80  #生成文件下载链接
-easy -download -f demo.txt -p 80 -pwd 123456 #生成文件下载链接,需要密码校验
-easy -download -d /data -p 80  #生成目录下载链接
-easy -download -d /data -p 80 -pwd 123456 #生成目录下载链接,需要密码校验
-easy -update -d /data -p 80  #生成上传链接，文件上传后存在/data目录下
-easy -update -d /data  -p 80 -pwd 123456 #生成上传链接,需要密码校验
+fileupdown -download -f demo.txt -p 80
+```
+# 生成文件下载链接,需要密码123456
+```
+fileupdown -download -f demo.txt -p 80 -pwd 123456 
+```
+# 生成目录浏览链接
+```
+fileupdown -download -d /data -p 80
+```
+# 生成目录浏览链接,需要密码123456
+```
+fileupdown -download -d /data -p 80 -pwd 123456
+```
+# 生成文件上传链接，文件上传后保存在/data目录下
+```
+fileupdown -upload -d /data -p 80
+```
+# 生成文件上传链接,需要密码123456
+```
+fileupdown -upload -d /data  -p 80 -pwd 123456
 ```
