@@ -19,7 +19,7 @@ import (
 
 var (
 	download  *bool   = flag.Bool("download", false, "download file")
-	update    *bool   = flag.Bool("update", false, "update file")
+	upload    *bool   = flag.Bool("upload", false, "upload file")
 	directory *string = flag.String("d", "nil", "Directory path")
 	file      *string = flag.String("f", "nil", "file path")
 	port      *string = flag.String("p", "8888", "Listening port")
@@ -38,13 +38,13 @@ func main() {
 	flag.Parse()
 	// 参数为空或参数都不为空
 	switch {
-	case *download == false && *update == false || *download != false && *update != false:
+	case *download == false && *upload == false || *download != false && *upload != false:
 		flag.Usage()
 		return
 	case *directory == "nil" && *file == "nil" || *directory != "nil" && *file != "nil":
 		flag.Usage()
 		return
-	case *update == true && *directory == "nil":
+	case *upload == true && *directory == "nil":
 		flag.Usage()
 		return
 	default:
@@ -52,7 +52,7 @@ func main() {
 			if *download {
 				fileDown()
 			} else {
-				updateFile()
+				uploadFile()
 			}
 		}()
 	}
@@ -61,7 +61,7 @@ func main() {
 }
 
 // 文件上传控制
-func updateFile() {
+func uploadFile() {
 	ok, _ := pathExist(*directory)
 	if !ok {
 		log.Fatal("Directory does not exist")
@@ -101,33 +101,33 @@ func updateFile() {
 
 		_, err = io.Copy(filewn, fileup)
 		if err != nil {
-			w.Write([]byte("file update error"))
+			w.Write([]byte("file upload error"))
 		}
-		w.Write([]byte("file update success"))
+		w.Write([]byte("file upload success"))
 	})
 
 	if *pwd != "nil" {
 		http.HandleFunc("/", authIndex)
-		http.HandleFunc(fmt.Sprintf("/%s", randomStr), updateIndex)
+		http.HandleFunc(fmt.Sprintf("/%s", randomStr), uploadIndex)
 		http.HandleFunc("/check_auth", auth_Check)
 
 	} else {
-		http.HandleFunc(fmt.Sprintf("/"), updateIndex)
+		http.HandleFunc(fmt.Sprintf("/"), uploadIndex)
 	}
 	for _, ip := range ipList {
-		fmt.Printf("Update link: http://%s:%s/\n\n", ip, *port)
+		fmt.Printf("upload link: http://%s:%s/\n\n", ip, *port)
 	}
 }
 
 /// 文件上传页面展示
-func updateIndex(w http.ResponseWriter, r *http.Request) {
+func uploadIndex(w http.ResponseWriter, r *http.Request) {
 	tpl := `
     <html>
     <head>
         <title>upload file</title>
     </head>
        <style>
-           .update {
+           .upload {
                position: relative;
                display: inline-block;
                background: #D0EEFF;
@@ -140,14 +140,14 @@ func updateIndex(w http.ResponseWriter, r *http.Request) {
                text-indent: 0;
                line-height: 20px;
            }
-           .update input {
+           .upload input {
                position: absolute;
                font-size: 100px;
                right: 0;
                top: 0;
                opacity: 0;
            }
-          .update:hover {
+          .upload:hover {
                background: #AADFFD;
                border-color: #78C3F3;
                color: #004974;
@@ -157,8 +157,8 @@ func updateIndex(w http.ResponseWriter, r *http.Request) {
 
         <body>
              <form id="uploadForm" method="POST" enctype="multipart/form-data" action="/{{ . }}">
-             <input type="FILE" id="file" name="file" class="update"/>
-             <input type="SUBMIT" value="upload"  class="update">
+             <input type="FILE" id="file" name="file" class="upload"/>
+             <input type="SUBMIT" value="upload"  class="upload">
            </form>
         </body>
     </html>
@@ -169,7 +169,7 @@ func updateIndex(w http.ResponseWriter, r *http.Request) {
 		r.Method,
 		r.RequestURI,
 	)
-	t, _ := template.New("fileupdate").Parse(tpl)
+	t, _ := template.New("fileupload").Parse(tpl)
 	t.Execute(w, randomstrup)
 }
 
@@ -296,7 +296,7 @@ func auth_Check(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if *update != false {
+	if *upload != false {
 		http.Redirect(w, r, fmt.Sprintf("/%s", randomstr), 302)
 	}
 
