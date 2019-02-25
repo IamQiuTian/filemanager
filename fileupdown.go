@@ -177,7 +177,7 @@ func uploadIndex(w http.ResponseWriter, r *http.Request) {
 func fileDown() {
 	// 如果未设置密码就直接生成下载链接
 	if *pwd == "nil" {
-		if *file != "false" {
+		if *file != "nil" {
 			file_Server()
 		} else {
 			directory_Server()
@@ -186,7 +186,7 @@ func fileDown() {
 		log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", *port), nil))
 	}
 
-	if *file != "false" {
+	if *file != "nil" {
 		file_Server()
 	} else {
 		directory_Server()
@@ -330,15 +330,17 @@ func file_Server() {
 	filename = filepath.Base(*file)
 
 	if *pwd == "nil" {
-		randomstr = "down"
+		randomstr = "/"
+	} else {
+		randomstr = "/" + randomstr + "/"
 	}
 
 	for _, ip := range ipList {
-		fmt.Printf("Download link: http://%s:%s/%s/%s\n\n", ip, *port, randomstr, filename)
+		fmt.Printf("Download link: http://%s:%s%s%s\n\n", ip, *port, randomstr, filename)
 	}
 
 	// 打印访问日志
-	http.HandleFunc(fmt.Sprintf("/%s/%s", randomstr, filename), func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc(fmt.Sprintf("%s%s", randomstr, filename), func(w http.ResponseWriter, r *http.Request) {
 		log.Printf(
 			"%s  %s  %s",
 			r.RemoteAddr,
@@ -357,16 +359,16 @@ func directory_Server() {
 	}
 
 	if *pwd == "nil" {
-		randomstr = "down"
+		randomstr = "/"
 	} else {
-		randomstr = randomStr(7)
+		randomstr = "/" + randomStr(7) + "/"
 	}
 
 	for _, ip := range ipList {
-		fmt.Printf("Access link: http://%s:%s/%s/\n\n", ip, *port, randomstr)
+		fmt.Printf("Access link: http://%s:%s%s\n\n", ip, *port, randomstr)
 	}
 
-	http.Handle(fmt.Sprintf("/%s/", randomstr), func(prefix string, h http.Handler) http.Handler {
+	http.Handle(fmt.Sprintf("%s", randomstr), func(prefix string, h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			log.Printf(
 				"%s  %s  %s",
@@ -385,7 +387,7 @@ func directory_Server() {
 				http.NotFound(w, r)
 			}
 		})
-	}(fmt.Sprintf("/%s/", randomstr), http.FileServer(http.Dir(*directory))))
+	}(fmt.Sprintf("%s", randomstr), http.FileServer(http.Dir(*directory))))
 }
 
 // 判断文件或目录是否存在
