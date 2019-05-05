@@ -63,7 +63,7 @@ func noPwd() {
 		}
 
 		filename = filepath.Base(*file)
-		http.HandleFunc(fmt.Sprintf("/%s/%s", randomstr, filename), fileServer)
+		http.HandleFunc(fmt.Sprintf("/%s", filename), fileServer)
 		for _, ip := range ipList {
 			fmt.Printf("link: http://%s:%s/%s\n\n", ip, *port, filename)
 		}
