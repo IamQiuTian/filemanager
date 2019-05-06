@@ -32,6 +32,127 @@ var (
 	ipList    = getIP()
 )
 
+var passwdtpl = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>password</title>
+
+    <style type="text/css">
+        body{
+            margin:0px;
+            background-color: white;
+            font-family: 'PT Sans', Helvetica, Arial, sans-serif;
+            text-align: center;
+            color: #A6A6A6;
+        }
+        /*输入框样式，去掉背景阴影模仿原生应用的输入框*/
+        input{
+            width: 100%;
+            height: 50px;
+            border:none;
+            padding-left:3px;
+            font-size: 18px;
+        }
+        input:focus {
+            outline: none;
+        }
+        /*显示隐藏密码图片*/
+        img{
+            width: 40px;
+            height: 25px;
+            position: absolute;
+            right: 0px;
+            margin: 15px;
+        }
+        /*登录按钮*/
+        button{
+            width: 200px;
+            height: 50px;
+            margin-top: 25px;
+            background: #1E90FF;
+            border-radius: 10px;
+            border:none;
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+        }
+        button:hover {
+            background: #79A84B;
+            outline: 0;
+        }
+        /*输入框底部半透明横线*/
+        .input_block {
+            border-bottom: 1px solid rgba(0,0,0,.1);
+        }
+        /*container*/
+        #page_container{
+            margin: 50px;
+        }
+    </style>
+</head>
+
+<body>
+
+<form  action="/authcheck" method='post'>
+    <div id="page_container">
+        <!--暗文密码输入框-->
+        <div class="input_block" id="psw_invisible">
+            <input type="password" id="input_invisible" placeholder="Password" name="password"/>
+        </div>
+        <button onclick="">Enter</button>
+    </div>
+</form>
+</body>
+</html>
+`
+
+var uploadtpl = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>upload</title>
+</head>
+<style>
+    .upload {
+        position: relative;
+        display: inline-block;
+        background: #D0EEFF;
+        border: 1px solid #99D3F5;
+        border-radius: 4px;
+        padding: 4px 12px;
+        overflow: hidden;
+        color: #1E88C7;
+        text-decoration: none;
+        text-indent: 0;
+        line-height: 20px;
+    }
+    .upload input {
+        position: absolute;
+        font-size: 100px;
+        right: 0;
+        top: 0;
+        opacity: 0;
+    }
+    .upload:hover {
+        background: #AADFFD;
+        border-color: #78C3F3;
+        color: #004974;
+        text-decoration: none;
+    }
+</style>
+
+<body>
+<form id="uploadForm" method="POST" enctype="multipart/form-data" action="/{{ . }}">
+    <input type="FILE" id="file" name="file" class="upload"/>
+    <input type="SUBMIT" value="upload"  class="upload">
+</form>
+</body>
+</html>
+`
+
 func main() {
 	flag.Parse()
 	switch {
@@ -162,26 +283,17 @@ func uploadFile(w http.ResponseWriter, r *http.Request) {
 }
 
 func uploadIndex(w http.ResponseWriter, r *http.Request) {
-	tpl, err := ioutil.ReadFile("./static/upload.html")
-	if err != nil {
-		w.Write([]byte("error!"))
-	}
 	log.Printf(
 		"%s  %s  %s",
 		r.RemoteAddr,
 		r.Method,
 		r.RequestURI,
 	)
-	t, _ := template.New("").Parse(string(tpl))
+	t, _ := template.New("").Parse(uploadtpl)
 	t.Execute(w, randomstr)
 }
 
 func authIndex(w http.ResponseWriter, r *http.Request) {
-	tpl, err := ioutil.ReadFile("./static/password.html")
-	if err != nil {
-		w.Write([]byte("error!"))
-	}
-
 	log.Printf(
 		"%s  %s  %s",
 		r.RemoteAddr,
@@ -189,7 +301,7 @@ func authIndex(w http.ResponseWriter, r *http.Request) {
 		r.RequestURI,
 	)
 
-	t, _ := template.New("").Parse(string(tpl))
+	t, _ := template.New("").Parse(passwdtpl)
 	t.Execute(w, nil)
 }
 
