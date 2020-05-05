@@ -27,18 +27,18 @@ var (
 )
 
 var (
-	filename  = ""
+	filename  string
 	randomstr = randomStr()
 	ipList    = getIP()
 )
 
+// Password validation page template
 var passwdtpl = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>password</title>
-
     <style type="text/css">
         body{
             margin:0px;
@@ -47,7 +47,6 @@ var passwdtpl = `
             text-align: center;
             color: #A6A6A6;
         }
-        /*输入框样式，去掉背景阴影模仿原生应用的输入框*/
         input{
             width: 100%;
             height: 50px;
@@ -58,7 +57,6 @@ var passwdtpl = `
         input:focus {
             outline: none;
         }
-        /*显示隐藏密码图片*/
         img{
             width: 40px;
             height: 25px;
@@ -66,7 +64,6 @@ var passwdtpl = `
             right: 0px;
             margin: 15px;
         }
-        /*登录按钮*/
         button{
             width: 200px;
             height: 50px;
@@ -82,7 +79,6 @@ var passwdtpl = `
             background: #79A84B;
             outline: 0;
         }
-        /*输入框底部半透明横线*/
         .input_block {
             border-bottom: 1px solid rgba(0,0,0,.1);
         }
@@ -92,12 +88,9 @@ var passwdtpl = `
         }
     </style>
 </head>
-
 <body>
-
 <form  action="/authcheck" method='post'>
     <div id="page_container">
-        <!--暗文密码输入框-->
         <div class="input_block" id="psw_invisible">
             <input type="password" id="input_invisible" placeholder="Password" name="password"/>
         </div>
@@ -143,7 +136,6 @@ var uploadtpl = `
         text-decoration: none;
     }
 </style>
-
 <body>
 <form id="uploadForm" method="POST" enctype="multipart/form-data" action="/{{ . }}">
     <input type="FILE" id="file" name="file" class="upload"/>
@@ -166,9 +158,9 @@ func main() {
 		flag.Usage()
 		return
 	case *pwd == "":
-		noPwd()
+		notPwd()
 	case *pwd != "":
-		isPwd()
+		aPwd()
 	default:
 		flag.Usage()
 		return
@@ -176,7 +168,8 @@ func main() {
 
 }
 
-func noPwd() {
+// No password verification is required
+func notPwd() {
 	switch {
 	case *file != "" && *download:
 		if ok, _ := pathExist(*file); !ok {
@@ -209,7 +202,8 @@ func noPwd() {
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", *port), nil))
 }
 
-func isPwd() {
+// You need to verify the password
+func aPwd() {
 	switch {
 	case *file != "" && *download:
 		if ok, _ := pathExist(*file); !ok {
@@ -372,6 +366,18 @@ func pathExist(path string) (bool, error) {
 	return false, err
 }
 
+func removeDuplicateElement(addrs []string) []string {
+	result := make([]string, 0, len(addrs))
+	temp := map[string]struct{}{}
+	for _, item := range addrs {
+		if _, ok := temp[item]; !ok {
+			temp[item] = struct{}{}
+			result = append(result, item)
+		}
+	}
+	return result
+}
+
 func getIP() (ipList []string) {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
@@ -400,5 +406,5 @@ getPublic:
 	}
 
 	ipList = append(ipList, strings.Replace(string(b), "\n", "", -1))
-	return
+	return removeDuplicateElement(ipList)
 }
