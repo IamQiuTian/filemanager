@@ -395,7 +395,7 @@ getPublic:
 	client := http.Client{
 		Timeout: time.Duration(2 * time.Second),
 	}
-	resp, err := client.Get("http://members.3322.org/dyndns/getip")
+	resp, err := client.Get("http://ifconfig.me")
 	if err != nil {
 		return
 	}
